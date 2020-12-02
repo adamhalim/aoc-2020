@@ -11,8 +11,10 @@ public class Day2 {
         String line;
         // Read through the file, line by line and do all
         // necessary logic for the task
-        int validPasswords = 0;
+        int validPasswordsOne = 0;
+        int validPasswordsTwo = 0;
         while((line = reader.readLine()) != null) {
+            String password = line.split(":")[1];
             int charCounter = 0;
             boolean firstDone = false;
             boolean secondDone = false;
@@ -23,7 +25,7 @@ public class Day2 {
             char charToCheck = ' ';
 
             // This will get the values for the minimums, maximums, and the character
-            // we're looking for in the password
+            // we're looking for in the password. (I suck at regex)
             for(char c : line.toCharArray()) {
                 if(c == '-') {
                     min = Integer.parseInt(memory);
@@ -50,9 +52,20 @@ public class Day2 {
             // When the line loop is over, we can check if the charCounter
             // is between the min- and max value
             if(charCounter >= min && charCounter <= max) {
-                validPasswords++;
+                validPasswordsOne++;
+            }
+            boolean oneMatch = false;
+            if(password.charAt(min) == charToCheck) {
+                oneMatch = true;
+            }
+            if(password.charAt(max) == charToCheck) {
+                oneMatch = !oneMatch;
+            }
+            if(oneMatch) {
+                validPasswordsTwo++;
             }
         }
-        System.out.println(validPasswords);
+        System.out.println("Part 1 | Valid passwords: " + validPasswordsOne);
+        System.out.println("Part 2 | Valid passwords: " + validPasswordsTwo);
     }
 }
