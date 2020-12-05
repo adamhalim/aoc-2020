@@ -72,3 +72,32 @@ int main() {
     printf("Valid passports: %d\n", valid_passes);
     return 0;
 }
+
+// This function will search for a substring within
+// another string and return it if there is a match.
+// If there is a not, this function returns NULL.
+char *get_substring(char *line, char *substr) {
+
+    // The matched_string will trim the first part of
+    // the string, not matching the substr. E.g
+    // strstr("Find me!!", "me") returns "me!!".
+    char *matched_string = strstr(line, substr);
+
+    // If no substring found, return null
+    if(matched_string == NULL) {
+        return NULL;
+    }
+
+    int start_index = matched_string - line;
+    char *res_str = malloc(strlen(substr) - start_index + 1); 
+    
+    int str_index = 0;
+    // We loop from our starting index, to the length of our 
+    // substr + the starting index, filling our char* with 
+    // chars from *line
+    for(int i = start_index; i < strlen(substr) + start_index; i++) {
+        res_str[str_index++] = line[i];
+    }
+    res_str[str_index] = '\0';
+    return res_str;
+}
