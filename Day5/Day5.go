@@ -10,12 +10,10 @@ import (
 func main() {
 
 	file, err := os.Open("input.txt")
-
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
-
 	scanner := bufio.NewScanner(file)
 
 	var line string
@@ -24,12 +22,37 @@ func main() {
 
 	for scanner.Scan() {
 		line, rowID = getRow(scanner.Text())
-		seatID := getID(line, rowID)
+		var seatID int16 = getID(line, rowID)
 		if seatID > highestID {
 			highestID = seatID
 		}
 	}
-	fmt.Printf("%d\n", highestID)
+
+	fmt.Printf("Highest seat ID: %d\n", highestID)
+
+	// Opens the file again. Not sure how to avoid this
+	// and still be able to read the file line by line again
+	file, err = os.Open("input.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	scanner = bufio.NewScanner(file)
+
+	// We create a bool array that says if a certain seat ID
+	// is taken up or not
+	var seatTaken = make([]bool, highestID+1)
+	for scanner.Scan() {
+		line, rowID = getRow(scanner.Text())
+		seatTaken[getID(line, rowID)] = true
+	}
+
+	// Check if seat before and after are taken
+	for i := 1; i < int(highestID); i++ {
+		if seatTaken[i-1] && seatTaken[i+1] && !seatTaken[i] {
+			fmt.Printf("My seatID is %d.\n", i)
+		}
+	}
 }
 
 func getID(line string, rowID int16) int16 {
