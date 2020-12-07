@@ -39,9 +39,9 @@ func getID(line string, rowID int16) int16 {
 
 	for i := 7; i < 10; i++ {
 		if line[i] == 'L' {
-			maxCol = (minCol + maxCol + 1) / 2
+			maxCol = (minCol + maxCol) / 2
 		} else {
-			minCol = (minCol + maxCol) / 2
+			minCol = (minCol + maxCol + 1) / 2
 		}
 	}
 
