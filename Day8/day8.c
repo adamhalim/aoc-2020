@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
  
- char* get_str(char* line);
  int get_val(char* line);
+ int find_loop(char* lines[], int line_counter);
+ int find_loop_changed_instruction(int index, char c, char* lines[], int line_counter);
 
  int accumulator = 0;
 
@@ -39,6 +40,88 @@ void main() {
         strcpy(lines[index++], line);
     }
 
+     /* Part one */
+     int acc = find_loop(lines, line_counter);
+
+     if(acc) {
+         printf("Loop found! Accumulator = %d\n", accumulator); 
+     }
+
+
+ /* ----------------------- PART TWO ------------------*/
+    // For part two, I want to count and find all occurances of 
+    // nop and jmp:
+    int nop_counter = 0;
+    int jmp_counter = 0;
+    for(int i = 0; i < line_counter; i++) {
+        if(*lines[i] == 'n') {
+            nop_counter++;
+        } else if(*lines[i] == 'j') {
+            jmp_counter++;
+        }
+    }
+
+    int nop_indexes[nop_counter];
+    int jmp_indexes[jmp_counter];
+    nop_counter = 0;
+    jmp_counter = 0;
+    for(int i = 0; i < line_counter; i++) {
+        if(*lines[i] == 'n') {
+            nop_indexes[nop_counter++] = i;
+        } else if(*lines[i] == 'j') {
+            jmp_indexes[jmp_counter++] = i;
+        }
+    }
+
+    // Now we pretty much want to do part 1 of the program again,
+    // switching out one occurance of jmp/nop one at a time
+    // and checking if the program terminates.
+    /* ----------------------- PART TWO ------------------*/
+
+    _Bool found_loop = 1;
+
+    for(int i = 0; i < nop_counter; i++) {
+       if(found_loop) {
+            found_loop = find_loop_changed_instruction(nop_indexes[i], 'j', lines, line_counter);
+        } else {
+            printf("Program ran successfully!\nAccumulator = %d\n", accumulator);
+            break;
+        }
+    }
+
+    for(int i = 0; i < jmp_counter; i++) {
+        if(found_loop) {
+            found_loop = find_loop_changed_instruction(jmp_indexes[i], 'n', lines, line_counter);
+        } else {
+            printf("Program ran successfully!\nAccumulator = %d\n", accumulator);
+            break;
+        }
+    }
+   
+}
+
+// This function will change an (nop<->jmp) entry in our lines[] and 
+// call find_loop. 
+int find_loop_changed_instruction(int index, char c, char* lines[], int line_counter) {
+    // Since our find_loop only looks at the first char of a line,
+    // we only need to change the first char and call find_loop
+    lines[index][0] = c;
+    int loop_found = find_loop(lines, line_counter);
+
+    // When we're done with find_loop, we want to change back the char 
+    // to what it was initially
+    if(c == 'n') {
+        lines[index][0] = 'j';
+    } else {
+        lines[index][0] = 'n';
+    }
+
+    return loop_found;
+}
+
+int find_loop(char* lines[], int line_counter){
+    accumulator = 0;
+    
     // We create a boolean array that keeps track of 
     // if we've already executed an instruction on a given line.
     // All values are initialized to 0 
@@ -52,18 +135,25 @@ void main() {
     // char of each string to check what to do
     for(int i = 0; i < line_counter; i++) {
         if(alreadyVisited[i]) {
-            printf("Loop found! Accumulator = %d.\n", accumulator);
-            break;
+            return 1;
         }
         if(*lines[i] == 'a') {
             accumulator += get_val(lines[i]);
         } else if (*lines[i] == 'j') {
             i += get_val(lines[i]) -1;
+            if( i > line_counter) {
+                // If we jump to somewhere outside of our scope,
+                // I guess we terminate?
+                return 0;
+            }
         } else if (*lines[i] == 'n') {
             // For now, don't do anything. Might delete later
         }
         alreadyVisited[i] = 1;
     }
+    // If we can loop through all of our instructions,
+    // the program will terminate successfully.
+    return 0;
 }
 
 // Returns the integer value of an instruction
